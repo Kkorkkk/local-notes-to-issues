@@ -13,3 +13,9 @@ test("extracts issue drafts from notes", () => {
   assert.deepEqual(parseCliArgs(["notes.md", "--gh"]), { file: "notes.md", gh: true });
   assert.throws(() => parseCliArgs([]), /Usage:/);
 });
+
+test("keeps email addresses while removing hyphenated assignees from titles", () => {
+  const issues = parseNotes("# Support\n- TODO email user@example.com about follow up @user-name #support P2");
+  assert.equal(issues[0].title, "email user@example.com about follow up");
+  assert.deepEqual(issues[0].assignees, ["user-name"]);
+});

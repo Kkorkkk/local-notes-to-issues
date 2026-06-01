@@ -13,7 +13,12 @@ export function parseNotes(text) {
     const todo = line.match(/^(?:[-*]\s*)?(?:\[\s\]\s*)?(TODO|FIXME|BUG|IDEA)?[:\-\s]*(.+)$/i);
     if (!todo || !/(TODO|FIXME|BUG|IDEA|\[\s\])/i.test(raw)) continue;
     const marker = (todo[1] || "todo").toLowerCase();
-    let title = todo[2].replace(/@\w+/g, "").replace(/#[-\w]+/g, "").replace(/\bP[0-3]\b/i, "").trim();
+    let title = todo[2]
+      .replace(/(^|\s)@[A-Za-z0-9-]+/g, " ")
+      .replace(/(^|\s)#[-\w]+/g, " ")
+      .replace(/\bP[0-3]\b/i, "")
+      .replace(/\s+/g, " ")
+      .trim();
     if (title.length < 4) continue;
     const labels = [
       marker === "bug" ? "bug" : null,
@@ -21,7 +26,7 @@ export function parseNotes(text) {
       marker === "fixme" ? "fixme" : null,
       ...[...raw.matchAll(/#([-\w]+)/g)].map((match) => match[1])
     ].filter(Boolean);
-    const assignees = [...raw.matchAll(/@([A-Za-z0-9-]+)/g)].map((match) => match[1]);
+    const assignees = [...raw.matchAll(/(?:^|\s)@([A-Za-z0-9-]+)/g)].map((match) => match[1]);
     const priority = raw.match(/\b(P[0-3])\b/i)?.[1]?.toUpperCase();
     const body = [`Source section: ${currentSection}`, priority ? `Priority: ${priority}` : null].filter(Boolean).join("\n");
     issues.push({ title, body, labels: labels.length ? [...new Set(labels)] : ["triage"], assignees, priority: priority || null });
