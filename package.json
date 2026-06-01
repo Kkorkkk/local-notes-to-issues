@@ -1,7 +1,7 @@
 {
   "name": "local-notes-to-issues",
   "version": "0.1.0",
-  "description": "Convert local notes and TODO lists into GitHub-ready issue JSON.",
+  "description": "Convert local notes and TODO lists into GitHub-ready issue JSON or gh commands.",
   "type": "module",
   "bin": {
     "local-notes-to-issues": "./src/index.js"
@@ -13,8 +13,9 @@
   "keywords": [
     "cli",
     "developer-tools",
-    "ai",
-    "github"
+    "github",
+    "issues",
+    "notes"
   ],
   "license": "MIT",
   "engines": {
