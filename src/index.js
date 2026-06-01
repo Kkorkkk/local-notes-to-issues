@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { readFileSync } from "node:fs";
+import { pathToFileURL } from "node:url";
 
 export function parseNotes(text) {
   const issues = [];
@@ -20,7 +21,7 @@ export function parseNotes(text) {
       marker === "fixme" ? "fixme" : null,
       ...[...raw.matchAll(/#([-\w]+)/g)].map((match) => match[1])
     ].filter(Boolean);
-    const assignees = [...raw.matchAll(/@(\w+)/g)].map((match) => match[1]);
+    const assignees = [...raw.matchAll(/@([A-Za-z0-9-]+)/g)].map((match) => match[1]);
     const priority = raw.match(/\b(P[0-3])\b/i)?.[1]?.toUpperCase();
     const body = [`Source section: ${currentSection}`, priority ? `Priority: ${priority}` : null].filter(Boolean).join("\n");
     issues.push({ title, body, labels: labels.length ? [...new Set(labels)] : ["triage"], assignees, priority: priority || null });
@@ -28,27 +29,29 @@ export function parseNotes(text) {
   return issues;
 }
 
-function quote(value) {
-  return JSON.stringify(String(value));
+function shellQuote(value) {
+  return `'${String(value).replaceAll("'", "'\\''")}'`;
 }
 
 export function renderGhCommands(issues) {
   return issues.map((issue) => {
-    const labels = issue.labels.map((label) => ` --label ${quote(label)}`).join("");
-    const assignees = issue.assignees.map((assignee) => ` --assignee ${quote(assignee)}`).join("");
-    return `gh issue create --title ${quote(issue.title)} --body ${quote(issue.body)}${labels}${assignees}`;
+    const labels = issue.labels.map((label) => ` --label ${shellQuote(label)}`).join("");
+    const assignees = issue.assignees.map((assignee) => ` --assignee ${shellQuote(assignee)}`).join("");
+    return `gh issue create --title ${shellQuote(issue.title)} --body ${shellQuote(issue.body)}${labels}${assignees}`;
   }).join("\n") + "\n";
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
-  const file = process.argv[2];
-  if (!file) {
-    console.error("Usage: local-notes-to-issues notes.md");
-    process.exit(1);
-  }
+export function parseCliArgs(args) {
+  const file = args.find((arg) => !arg.startsWith("--"));
+  if (!file) throw new Error("Usage: local-notes-to-issues notes.md [--gh]");
+  return { file, gh: args.includes("--format=gh") || args.includes("--gh") };
+}
+
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   try {
+    const { file, gh } = parseCliArgs(process.argv.slice(2));
     const issues = parseNotes(readFileSync(file, "utf8"));
-    console.log(process.argv.includes("--format=gh") || process.argv.includes("--gh") ? renderGhCommands(issues) : JSON.stringify(issues, null, 2));
+    console.log(gh ? renderGhCommands(issues) : JSON.stringify(issues, null, 2));
   } catch (error) {
     console.error(`local-notes-to-issues: ${error.message}`);
     process.exit(2);

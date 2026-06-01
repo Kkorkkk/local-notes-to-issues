@@ -16,3 +16,5 @@ The output can be imported by a script or pasted into GitHub issue creation tool
 ## Limits
 
 Plain bullet lists are ignored so ordinary notes do not become accidental issues.
+
+`--gh` output uses single-quoted shell arguments so `$` and backticks in note text are not expanded by your shell.
