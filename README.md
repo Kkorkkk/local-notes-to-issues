@@ -2,6 +2,12 @@
 
 [![CI](https://github.com/Kkorkkk/local-notes-to-issues/actions/workflows/ci.yml/badge.svg)](https://github.com/Kkorkkk/local-notes-to-issues/actions/workflows/ci.yml)
 
+## Overview / 项目说明
+
+English: Local Notes To Issues turns rough notes, TODOs, bugs, ideas, labels, assignees, and priorities into GitHub-ready issue drafts. It is useful when planning work from local markdown before deciding what should become real issues.
+
+中文：Local Notes To Issues 可以把零散笔记、TODO、BUG、IDEA、标签、负责人和优先级转换成可用于 GitHub 的 issue 草稿。它适合先在本地 markdown 中整理想法，再筛选哪些内容值得变成正式 issue。
+
 Turn messy notes into GitHub-ready issue drafts.
 
 ## Install
